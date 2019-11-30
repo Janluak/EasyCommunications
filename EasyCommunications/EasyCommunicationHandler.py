@@ -78,28 +78,27 @@ class EasyCommunicationHandler:
             if no data is available, returns `False`; else returns the received data
 
         """
-        # non-blocking read: checking the state of the socket
-        ready_to_read, ready_to_write, in_error = select(
-            [self._connection], [self._connection], [self._connection], 10
-        )
-
         # if no data in queue
-        if not ready_to_read:
+        if not select([self._connection], [self._connection], [self._connection], 10)[0]:
             return False
 
-        # reading data from queue
         try:
-            data = self._connection.recv(1024)
-        except ConnectionResetError:
-            print("ws shut down")  # ToDo
+            # read all data from buffer
+            byte_data = bytes()
+            while select([self._connection], [self._connection], [self._connection], 10)[0]:
+                byte_data += self._connection.recv(1024)
+
+        except (ConnectionError, ConnectionResetError):
+            print("shut down in connection")
             raise SystemExit
 
-        # unpacking the data
+        # unpack the data
         try:
-            data = loads(data)
-            return data
+            return loads(byte_data)
         except UnpicklingError:
-            raise ValueError
+            # ToDo encryption
+            raise ValueError("unpacking the data failed")
+
 
     def wait_until_receiving(self, timeout=None):
         """
