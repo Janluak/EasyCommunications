@@ -79,11 +79,14 @@ class EasyCommunicationHandler:
     def wait_until_receiving(self, timeout=None):
         data = False
         timestamp = time.time()
-        while not data:
+
+        # loop until data
+        while isinstance(timeout, type(None)) or timestamp + timeout > time.time():
             data = self.receive()
-            if timeout and (timestamp + timeout) > time.time():
-                raise TimeoutError
-        return data
+            if data:
+                return data
+        else:
+            raise TimeoutError
 
 
 class EasyCommunicationSlave(EasyCommunicationHandler):
