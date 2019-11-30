@@ -14,7 +14,7 @@ with open("README.md", "r") as f:
 setup(
     name=project_name,
     version=version,
-    description="basic tools for taking care for making the intro to handling handling with python easier",
+    description="light-weight support for connecting different python scripts",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url=url,
