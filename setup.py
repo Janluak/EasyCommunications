@@ -21,7 +21,7 @@ setup(
     author=author,
     author_email=author_email,
     license=packet_license,
-    packages=["datesy", "datesy/file_IO"],
+    packages=["ecoms"],
     python_requires=">=3.6",
     zip_safe=False,
     classifiers=[

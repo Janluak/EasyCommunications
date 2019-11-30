@@ -99,7 +99,6 @@ class EasyCommunicationHandler:
             # ToDo encryption
             raise ValueError("unpacking the data failed")
 
-
     def wait_until_receiving(self, timeout=None):
         """
         Wait until data was received from the connected entity
@@ -127,19 +126,19 @@ class EasyCommunicationHandler:
 
 
 class EasyCommunicationSlave(EasyCommunicationHandler):
-    def __init__(self, host, port, service_name=None):
-        """
-        Initializing the slave
+    """
+    Initializing the slave
 
-        Parameters
-        ----------
-        host : str ['192.168.0.1', 'localhost', '127.0.0.1']
-            the host IP to connect to
-        port : int
-            the host port to connect to
-        service_name : str, optional
-            a name identifying the slave at the server
-        """
+    Parameters
+    ----------
+    host : str ['192.168.0.1', 'localhost', '127.0.0.1']
+        the host IP to connect to
+    port : int
+        the host port to connect to
+    service_name : str, optional
+        a name identifying the slave at the server
+    """
+    def __init__(self, host, port, service_name=None):
         super().__init__(host)
 
         self.__connect_to_master(port, service_name)
@@ -160,17 +159,17 @@ class EasyCommunicationSlave(EasyCommunicationHandler):
 
 
 class EasyCommunicationMaster(EasyCommunicationHandler):
-    def __init__(self, port, slave_ip=None):
-        """
-        Initializing the master
+    """
+    Initializing the master
 
-        Parameters
-        ----------
-        port : int
-            the port to open for possible slave connections
-        slave_ip : str ['192.168.0.1', 'localhost', '127.0.0.1'], optional
-            limiting the possible slave-connections to this particular IP
-        """
+    Parameters
+    ----------
+    port : int
+        the port to open for possible slave connections
+    slave_ip : str ['192.168.0.1', 'localhost', '127.0.0.1'], optional
+        limiting the possible slave-connections to this particular IP
+    """
+    def __init__(self, port, slave_ip=None):
         super().__init__(slave_ip)
         if self.host == socket.gethostname():
             self.logger.warning("only accepting local connections")
