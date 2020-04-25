@@ -2,6 +2,12 @@ import socket, logging, time
 from pickle import dumps, loads, UnpicklingError
 from select import select
 
+__all__ = [
+    "EasyCommunicationMaster",
+    "EasyCommunicationSlave",
+    "EasyCommunicationElement",
+]
+
 
 class EasyCommunicationElement:
     def __init__(self, statusCode=None, payload=None, error=None, **kwargs):
@@ -56,7 +62,7 @@ class EasyCommunicationHandler:
             any kind of data that shall be transferred
         error : any, str, optional
             helpful special variable for sharing error information
-        kwargs : any, optional
+        kwargs : str, int, tuple, list, set, dict, optional
             any kind of data may be specified
 
         """
@@ -79,13 +85,17 @@ class EasyCommunicationHandler:
 
         """
         # if no data in queue
-        if not select([self._connection], [self._connection], [self._connection], 10)[0]:
+        if not select([self._connection], [self._connection], [self._connection], 10)[
+            0
+        ]:
             return False
 
         try:
             # read all data from buffer
             byte_data = bytes()
-            while select([self._connection], [self._connection], [self._connection], 10)[0]:
+            while select(
+                [self._connection], [self._connection], [self._connection], 10
+            )[0]:
                 byte_data += self._connection.recv(1024)
 
         except (ConnectionError, ConnectionResetError):
@@ -138,6 +148,7 @@ class EasyCommunicationSlave(EasyCommunicationHandler):
     service_name : str, optional
         a name identifying the slave at the server
     """
+
     def __init__(self, host, port, service_name=None):
         super().__init__(host)
 
@@ -169,6 +180,7 @@ class EasyCommunicationMaster(EasyCommunicationHandler):
     slave_ip : str ['192.168.0.1', 'localhost', '127.0.0.1'], optional
         limiting the possible slave-connections to this particular IP
     """
+
     def __init__(self, port, slave_ip=None):
         super().__init__(slave_ip)
         if self.host == socket.gethostname():
@@ -191,14 +203,16 @@ class EasyCommunicationMaster(EasyCommunicationHandler):
             if data.request == "INIT":
                 self.logger.log(
                     25,
-                    f"Control connection for {data.payload['serviceName']} from {addr[0]}:{addr[1]} to port {port} established",
+                    f"Control connection for {data.payload['serviceName']} "
+                    f"from {addr[0]}:{addr[1]} to port {port} established",
                 )
                 self.send(statusCode=200)
                 return
 
             else:
                 self.logger.error(
-                    f"Control connection for {data.payload['serviceName']} failed from from {addr[0]}:{addr[1]} to port {port}"
+                    f"Control connection for {data.payload['serviceName']} "
+                    f"failed from from {addr[0]}:{addr[1]} to port {port}"
                 )
                 self.send(statusCode=404)
                 raise ConnectionError
