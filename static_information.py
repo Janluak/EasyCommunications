@@ -1,6 +1,6 @@
 # static information that is relevant for packet management and documentation
 project_name = "EasyCommunications"
-version = "0.1.0"
+version = "0.1.1"
 url = "https://github.com/janluak/easycommunication"
 author = "Jan Lukas Braje"
 author_email = "ecoms@braje.org"
