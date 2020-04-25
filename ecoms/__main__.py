@@ -1,4 +1,5 @@
 from ecoms import EasyCommunicationSlave
+from ast import literal_eval
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -9,12 +10,20 @@ data = parser.parse_args()
 
 host = data.host[0]
 port = data.port[0]
-payload = " ".join(data.payload)
+
+try:
+    payload = literal_eval(bytes.fromhex(data.payload[0]).decode("utf-8"))
+except Exception as e:
+    payload = " ".join(data.payload)
 if not payload:
     raise KeyError("host, port and payload must be given")
 
-
-slave = EasyCommunicationSlave(host=host, port=port)
+while True:
+    try:
+        slave = EasyCommunicationSlave(host=host, port=port)
+        break
+    except ConnectionRefusedError:
+        pass
 slave.send(payload=payload)
 data = slave.wait_until_receiving()
 slave.close_connection()

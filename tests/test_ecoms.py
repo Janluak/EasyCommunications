@@ -59,3 +59,21 @@ class TestEcomsFromShell(TestCase):
         self.master.send(statusCode=200)
         self.assertEqual(self.payload, received.payload)
 
+
+class TestEcomsShellDropAdvancedData(TestCase):
+    def setUp(self) -> None:
+        self.payload = {"some Key": "basic data"}
+
+        self.port = drop_slave_providing_data("localhost", 0, self.payload)
+
+    def tearDown(self) -> None:
+        self.master.close_connection()
+
+    def test_get_data_from_drop_slave(self):
+        self.master = EasyCommunicationMaster(port=self.port, slave_ip="localhost")
+
+        received = self.master.wait_until_receiving()
+        self.master.send(statusCode=200)
+
+        self.assertEqual(self.payload, received.payload)
+
