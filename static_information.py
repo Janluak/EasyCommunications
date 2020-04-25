@@ -1,6 +1,7 @@
 # static information that is relevant for packet management and documentation
+from ecoms import __versions__
 project_name = "EasyCommunications"
-version = "0.1.3"
+version = __versions__
 url = "https://github.com/janluak/easycommunication"
 author = "Jan Lukas Braje"
 author_email = "ecoms@braje.org"
