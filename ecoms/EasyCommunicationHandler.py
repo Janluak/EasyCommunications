@@ -134,6 +134,9 @@ class EasyCommunicationHandler:
         else:
             raise TimeoutError
 
+    def close_connection(self):
+        self._connection.close()
+
 
 class EasyCommunicationSlave(EasyCommunicationHandler):
     """
