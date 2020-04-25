@@ -60,16 +60,9 @@ class TestEcomsFromShell(TestCase):
         self.assertEqual(self.payload, received.payload)
 
 
-class TestEcomsShellDropAdvancedData(TestCase):
-    def setUp(self) -> None:
-        self.payload = {"some Key": "basic data"}
-
+class TestEcomsShellDropData(TestCase):
+    def do_testing(self):
         self.port = drop_slave_providing_data("localhost", 0, self.payload)
-
-    def tearDown(self) -> None:
-        self.master.close_connection()
-
-    def test_get_data_from_drop_slave(self):
         self.master = EasyCommunicationMaster(port=self.port, slave_ip="localhost")
 
         received = self.master.wait_until_receiving()
@@ -77,3 +70,35 @@ class TestEcomsShellDropAdvancedData(TestCase):
 
         self.assertEqual(self.payload, received.payload)
 
+    def tearDown(self) -> None:
+        self.master.close_connection()
+
+    def test_get_int_from_drop_slave(self):
+        self.payload = 3234
+
+        self.do_testing()
+
+    def test_get_float_from_drop_slave(self):
+        self.payload = 0.23
+
+        self.do_testing()
+
+    def test_get_string_from_drop_slave(self):
+        self.payload = "adsklfjh asdf n"
+
+        self.do_testing()
+
+    def test_get_list_from_drop_slave(self):
+        self.payload = ["some Key", "basic data", 23]
+
+        self.do_testing()
+
+    def test_get_set_from_drop_slave(self):
+        self.payload = {"some Key", "basic data", 23}
+
+        self.do_testing()
+
+    def test_get_dict_from_drop_slave(self):
+        self.payload = {"some Key": "basic data"}
+
+        self.do_testing()

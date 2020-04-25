@@ -13,6 +13,8 @@ port = data.port[0]
 
 try:
     payload = literal_eval(bytes.fromhex(data.payload[0]).decode("utf-8"))
+except SyntaxError:
+    payload = bytes.fromhex(data.payload[0]).decode("utf-8")
 except Exception as e:
     payload = " ".join(data.payload)
 if not payload:
