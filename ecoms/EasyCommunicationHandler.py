@@ -1,12 +1,22 @@
 import socket, logging, time
 from pickle import dumps, loads, UnpicklingError
 from select import select
+from contextlib import closing
+
 
 __all__ = [
     "EasyCommunicationMaster",
     "EasyCommunicationSlave",
     "EasyCommunicationElement",
+    "find_free_port"
 ]
+
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 
 class EasyCommunicationElement:
@@ -94,7 +104,7 @@ class EasyCommunicationHandler:
             # read all data from buffer
             byte_data = bytes()
             while select(
-                [self._connection], [self._connection], [self._connection], 10
+                    [self._connection], [self._connection], [self._connection], 10
             )[0]:
                 byte_data += self._connection.recv(1024)
 
@@ -186,19 +196,26 @@ class EasyCommunicationMaster(EasyCommunicationHandler):
 
     def __init__(self, port, slave_ip=None):
         super().__init__(slave_ip)
+        self.__port = port if port else find_free_port()
         if self.host == socket.gethostname():
             self.logger.warning("only accepting local connections")
         else:
             self.logger.warning("accepting connections from all IPs")
 
-        self.__open_port_for_slave(port)
+        self.__open_port_for_slave()
 
-    def __open_port_for_slave(self, port):
+    @property
+    def port(self):
+        return self.__port
+
+    def __open_port_for_slave(self):
         while True:
-            self._connection.bind((self.host, port))
+            self._connection.bind((self.host, self.__port))
+            self.__port = self._connection.getsockname()[1]
+
             self._connection.listen(2)
 
-            self.logger.info(f"master listening on port {port}")
+            self.logger.info(f"master listening on port {self.port}")
 
             self._connection, addr = self._connection.accept()
 
@@ -207,7 +224,7 @@ class EasyCommunicationMaster(EasyCommunicationHandler):
                 self.logger.log(
                     25,
                     f"Control connection for {data.payload['serviceName']} "
-                    f"from {addr[0]}:{addr[1]} to port {port} established",
+                    f"from {addr[0]}:{addr[1]} to port {self.port} established",
                 )
                 self.send(statusCode=200)
                 return
@@ -215,7 +232,7 @@ class EasyCommunicationMaster(EasyCommunicationHandler):
             else:
                 self.logger.error(
                     f"Control connection for {data.payload['serviceName']} "
-                    f"failed from from {addr[0]}:{addr[1]} to port {port}"
+                    f"failed from from {addr[0]}:{addr[1]} to port {self.port}"
                 )
                 self.send(statusCode=404)
                 raise ConnectionError
