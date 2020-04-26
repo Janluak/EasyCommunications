@@ -102,3 +102,23 @@ class TestEcomsShellDropData(TestCase):
         self.payload = {"some Key": "basic data"}
 
         self.do_testing()
+
+
+class TestEcomsNativeShellDropData(TestCase):
+    def setUp(self) -> None:
+
+        self.port = find_free_port()
+        self.data = "asdf sdfslj"
+
+        Popen(f"python3 -m ecoms localhost {self.port} {self.data}", shell=True)
+
+    def tearDown(self) -> None:
+        self.master.close_connection()
+
+    def test_get_int_from_drop_slave(self):
+
+        self.master = EasyCommunicationMaster(port=self.port, slave_ip="localhost")
+        received = self.master.wait_until_receiving()
+        self.master.send(statusCode=200)
+
+        self.assertEqual(self.data, received.payload)
